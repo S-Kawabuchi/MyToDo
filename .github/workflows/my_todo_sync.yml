@@ -10,39 +10,50 @@ jobs:
     if: contains(github.event.issue.labels.*.name, '00_MyToDo')
     runs-on: ubuntu-latest
     steps:
-      # 1. プロジェクトにIssueを追加してItemIDを取得
-      - name: Add Issue to Project
-        uses: actions/add-to-project@v1.0.1
+      # 1. GitHub CLIを使用してIssueをプロジェクトに追加、または既存のItemIDを取得
+      - name: Add or Get Project Item ID
         id: add_project
-        with:
-          project-url: https://github.com/users/S-Kawabuchi/projects/1
-          github-token: ${{ secrets.MY_PROJECT_PAT }}
+        env:
+          GH_TOKEN: ${{ secrets.MY_PROJECT_PAT }}
+          PRJ_ID: "PVT_kwHOBGaMN84BPBxJ"
+          ISSUE_ID: ${{ github.event.issue.node_id }}
+        run: |
+          # addProjectV2ItemById mutation を使用。既にある場合も現在のItemIDを返します。
+          item_id=$(gh api graphql -f query='
+            mutation($project:ID!, $issue:ID!) {
+              addProjectV2ItemById(input: {projectId: $project, contentId: $issue}) {
+                item { id }
+              }
+            }' -f project=$PRJ_ID -f issue=$ISSUE_ID --jq '.data.addProjectV2ItemById.item.id')
+          
+          if [ -z "$item_id" ]; then
+            echo "Failed to get item_id"
+            exit 1
+          fi
+          echo "item_id=$item_id" >> $GITHUB_OUTPUT
 
-      # 2. GraphQLでStatusをinboxにし、期限(Expired)を代入
+      # 2. ステータスをinboxにし、期限(Expired)を代入
       - name: Set Status and Expired Date
         uses: actions/github-script@v7
         env:
-          # ここで環境変数として item-id を定義する
-          PROJECT_ITEM_ID: ${{ steps.add_project.outputs.item-id }}
+          PROJECT_ITEM_ID: ${{ steps.add_project.outputs.item_id }}
         with:
           github-token: ${{ secrets.MY_PROJECT_PAT }}
           script: |
             const issueBody = context.payload.issue.body || "";
-            // 本文から YYYY-MM-DD 形式の日付を抽出 (例: 2026-02-14)
+            // 本文から YYYY-MM-DD 形式の日付を抽出
             const dateMatch = issueBody.match(/\d{4}-\d{2}-\d{2}/);
             const expiredDate = dateMatch ? dateMatch[0] : null;
 
             const projectId = "PVT_kwHOBGaMN84BPBxJ";
-            // 環境変数から item-id を取得する
             const itemId = process.env.PROJECT_ITEM_ID;
             
             const statusFieldId = "PVTSSF_lAHOBGaMN84BPBxJzg9jq0U";
             const inboxOptionId = "ffcb7607";
             const expiredFieldId = "PVTF_lAHOBGaMN84BPBxJzg9rXts";
 
-            // itemId が取得できていない場合はエラーを投げて止める（デバッグ用）
-            if (!itemId) {
-              throw new Error("Project Item ID could not be retrieved from previous step.");
+            if (!itemId || itemId === "null") {
+              throw new Error("Project Item ID could not be retrieved.");
             }
 
             const query = `
