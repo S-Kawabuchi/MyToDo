@@ -1,5 +1,6 @@
 ---
 name: New ToDo
+about: See .github/ISSUE_TEMPLATE/create_todo.md
 title:  "[DATE]: [FEATURE NAME]"
 labels: 'ToDo'
 projects: 'S-Kawabuchi/MyToDo'
