@@ -12,7 +12,7 @@ assignees: 'S-Kawabuchi'
 * なぜやるか
 
 ## ⏰ 期限 (Deadline)
-* [ ] 202X-MM-DD までに完了
+* [ ] 202X-MM-DD までに完了 ※FMT：YYYY-MM-DD
 
 ## 📋 手順・チェックリスト (Steps)
 - [ ] 手順1
