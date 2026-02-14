@@ -1,5 +1,4 @@
 ---
-
 name: New ToDo
 title:  "[DATE]: [FEATURE NAME]"
 labels: 'ToDo'
