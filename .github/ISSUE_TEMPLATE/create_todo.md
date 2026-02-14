@@ -1,8 +1,8 @@
 ---
 name: New ToDo
-about: 新規ToDo作成
-title: "[REQ] "
-labels: new
+title:  "[DATE]: [FEATURE NAME]"
+labels: 'ToDo'
+projects: 'S-Kawabuchi/MyToDo'
 assignees: 'S-Kawabuchi'
 ---
 
