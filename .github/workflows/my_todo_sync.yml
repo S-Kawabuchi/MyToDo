@@ -2,12 +2,12 @@ name: MyToDo Project Automation
 
 on:
   issues:
-    types: [opened, labeled]
+    types: [labeled]
 
 jobs:
   setup_project_item:
     # ラベル「00_MyToDo」が付与された時のみ実行
-    if: contains(github.event.issue.labels.*.name, '00_MyToDo')
+    if: github.event.label.name == '00_MyToDo' || contains(github.event.issue.labels.*.name, '00_MyToDo')
     runs-on: ubuntu-latest
     steps:
       # 1. GitHub CLIを使用してIssueをプロジェクトに追加、または既存のItemIDを取得
